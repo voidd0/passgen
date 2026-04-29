@@ -1,6 +1,6 @@
 {
   "name": "@v0idd0/passgen",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "passgen — generate cryptographically random passwords + diceware-style passphrases. Reports entropy in bits and a cracking-time estimate. Uses crypto.randomBytes with rejection sampling for unbiased indices. Zero deps. Free forever from vøiddo.",
   "main": "src/index.js",
   "bin": {
@@ -43,9 +43,14 @@
     "node": ">=14"
   },
   "files": [
-    "bin",
-    "src",
-    "README.md",
-    "LICENSE"
+    "bin/",
+    "src/",
+    "LICENSE",
+    "README.md"
+  ],
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
   ]
 }
