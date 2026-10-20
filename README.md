@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-A0573A.svg)](LICENSE)
 [![Node ≥14](https://img.shields.io/badge/node-%E2%89%A514-1F1A14)](package.json)
 
-Generate cryptographically random passwords + diceware-style passphrases. Reports entropy in bits and a cracking-time estimate. Zero deps. Free forever from vøiddo.
+Generate cryptographically random passwords + diceware-style passphrases. Reports entropy in bits and a cracking-time estimate. Zero deps..
 
 ```
 $ passgen
@@ -19,7 +19,7 @@ Casual-Define-Cover-Hybrid-Axis-5742
 
 ## Why passgen
 
-Most "online password generators" are happy to use `Math.random()` (a PRNG that an attacker reading your timestamp can rewind), and most CLI alternatives use byte-modulo (which gives an off-by-one bias when modulus doesn't divide 256). passgen uses node's CSPRNG with **rejection sampling on uint32** — every character of the alphabet (or every word of the wordlist) appears with exactly equal probability. That extra rigor is invisible in the output but visible in the entropy report.
+Most "online password generators" are happy to use `Math.random()` (a PRNG that an attacker reading your timestamp can rewind), and most CLI alternatives use byte-modulo (which gives an off-by-one bias when modulus doesn't divide 256). passgen uses node's CSPRNG with **rejection sampling on uint32**, every character of the alphabet (or every word of the wordlist) appears with exactly equal probability. That extra rigor is invisible in the output but visible in the entropy report.
 
 ## Install
 
@@ -58,23 +58,23 @@ passgen --json | jq .password
 
 ## How random is it?
 
-Entropy comes from `crypto.randomBytes` — node's CSPRNG (kernel `getrandom()` on Linux, `BCryptGenRandom` on Windows). Indices are derived via **rejection sampling on uint32**, which means every character of the alphabet (or every word of the wordlist) appears with exactly equal probability. No off-by-one bias from naïve `% N`.
+Entropy comes from `crypto.randomBytes`: node's CSPRNG (kernel `getrandom()` on Linux, `BCryptGenRandom` on Windows). Indices are derived via **rejection sampling on uint32**, which means every character of the alphabet (or every word of the wordlist) appears with exactly equal probability. No off-by-one bias from naïve `% N`.
 
 ## Strength scale
 
 | bits | label | rough crack time at 10¹¹ guesses/sec |
 |---|---|---|
-| < 28 | weak | seconds–minutes |
-| 28–60 | reasonable | hours–months |
-| 60–90 | strong | years |
-| 90–128 | very strong | thousands–millions of years |
+| < 28 | weak | seconds: minutes |
+| 28-60 | reasonable | hours: months |
+| 60-90 | strong | years |
+| 90-128 | very strong | thousands: millions of years |
 | ≥ 128 | paranoid | effectively forever |
 
-Crack times assume an offline attack against a fast hash (SHA-256, MD5). bcrypt / Argon2 / scrypt are 10⁶–10⁸× slower, so even "reasonable" entropy is safe in practice when the server hashes properly.
+Crack times assume an offline attack against a fast hash (SHA-256, MD5). bcrypt / Argon2 / scrypt are 10⁶, 10⁸× slower, so even "reasonable" entropy is safe in practice when the server hashes properly.
 
 ## Compared to alternatives
 
-| tool | RNG | bias-free sampling | passphrase mode | offline | install |
+| tool | RNG | unbiased sampling | passphrase mode | offline | install |
 |---|---|---|---|---|---|
 | passgen | CSPRNG (`randomBytes`) | yes (rejection on uint32) | yes (1024-word list) | yes | one npm install |
 | `pwgen` | non-cryptographic | no | no | yes | bundled (Linux) |
@@ -82,17 +82,17 @@ Crack times assume an offline attack against a fast hash (SHA-256, MD5). bcrypt 
 | `1password generate` | CSPRNG | yes | yes | requires app | app |
 | Web generators | varies | rarely documented | varies | no | web |
 
-If you're already in 1Password or Bitwarden, use those — they sync. passgen is for the cases where you need a one-shot strong string in your shell (provisioning, CI seeds, DB roots).
+If you're already in 1Password or Bitwarden, use those, they sync. passgen is for the cases where you need a one-shot strong string in your shell (provisioning, CI seeds, DB roots).
 
 ## FAQ
 
 **Why diceware over random characters?** Because 5 short words are easier to memorize than 9 random characters of equivalent entropy. Memorability matters when the password is for something you'll type, not paste.
 
-**Why a custom wordlist instead of EFF's 7776?** Smaller (1024 entries → 10 bits/word vs EFF's ~12.92), curated for shorter words (4–8 letters) and no homoglyph confusion. Trade-off: you need slightly more words (5 → 50 bits vs EFF's ~38.7) for the same entropy budget.
+**Why a custom wordlist instead of EFF's 7776?** Smaller (1024 entries → 10 bits/word vs EFF's ~12.92), curated for shorter words (4-8 letters) and no homoglyph confusion. Trade-off: you need slightly more words (5 → 50 bits vs EFF's ~38.7) for the same entropy budget.
 
-**Should I use `--no-symbols`?** Only if your target system rejects them. Letters+digits gives ~5.95 bits/char vs full mixed at ~6.55 — a 16-char password drops from 105 to 95 bits, both still in "very strong" territory.
+**Should I use `--no-symbols`?** Only if your target system rejects them. Letters+digits gives ~5.95 bits/char vs full mixed at ~6.55, a 16-char password drops from 105 to 95 bits, both still in "very strong" territory.
 
-**Is "1024 word list" not power-of-two-suspicious for rejection sampling?** Caught one yourself. Naive single-byte rejection deadlocks when the wordlist size divides 256 (the rejection range becomes empty). passgen reads 4 bytes per index and rejects on `remainder == 0 ? range : range - remainder` — the same gate works for 256-, 1024-, and 65536-word lists.
+**Is "1024 word list" not power-of-two-suspicious for rejection sampling?** Caught one yourself. Naive single-byte rejection deadlocks when the wordlist size divides 256 (the rejection range becomes empty). passgen reads 4 bytes per index and rejects on `remainder == 0 ? range : range - remainder`, the same gate works for 256-, 1024-, and 65536-word lists.
 
 ## Programmatic API
 
@@ -109,19 +109,7 @@ console.log(phrase);
 
 ## Wordlist
 
-passgen ships with a 1024-word built-in list (4–8 letter, lowercase, no homoglyphs). log₂(1024) = 10 bits per word — five words = 50 bits, the same ballpark as a 9-character mixed password but vastly more memorable.
-
-## More from the studio
-
-This is one tool out of many — see [`from-the-studio.md`](from-the-studio.md) for the full lineup of vøiddo products (other CLI tools, browser extensions, the studio's flagship products and games).
-
-## From the same studio
-
-- **[@v0idd0/jsonyo](https://www.npmjs.com/package/@v0idd0/jsonyo)** — JSON swiss army knife, 18 commands, zero limits
-- **[@v0idd0/envguard](https://www.npmjs.com/package/@v0idd0/envguard)** — stop shipping `.env` drift to staging
-- **[@v0idd0/depcheck](https://www.npmjs.com/package/@v0idd0/depcheck)** — find unused dependencies in one command
-- **[@v0idd0/gitstats](https://www.npmjs.com/package/@v0idd0/gitstats)** — git repo analytics, one command
-- **[View all tools →](https://voiddo.com/tools/)**
+passgen ships with a 1024-word built-in list (4-8 letter, lowercase, no homoglyphs). log₂(1024) = 10 bits per word, five words = 50 bits, the same ballpark as a 9-character mixed password but vastly more memorable.
 
 ## License
 
@@ -129,4 +117,4 @@ MIT.
 
 ---
 
-Built by [vøiddo](https://voiddo.com/) — a small studio shipping AI-flavoured products, free dev tools, Chrome extensions and weird browser games.
+Maintained by v0idd0.
