@@ -76,6 +76,12 @@ console.log('\nentropyBits:');
   truthy('5-word passphrase ≈54.1 bits', Math.abs(bits - 5 * Math.log2(1810)) < 0.01);
 }
 
+{
+  // one unit is singular, more are plural
+  truthy('1 day is singular', /^1 day$/.test(crackTimeEstimate(Math.log2(86400 * 1.2 * 2e11))));
+  truthy('2 days is plural', /^2 days$/.test(crackTimeEstimate(Math.log2(86400 * 2 * 2e11))));
+}
+
 console.log('\nstrengthLabel:');
 eq('weak < 28',                        strengthLabel(20),   'weak');
 eq('reasonable 28-60',                 strengthLabel(45),   'reasonable');

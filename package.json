@@ -1,6 +1,6 @@
 {
   "name": "@v0idd0/passgen",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Generate random passwords and passphrases of random words with Node.js crypto.randomBytes, with an entropy estimate in bits and a rough offline cracking time.",
   "main": "src/index.js",
   "bin": {

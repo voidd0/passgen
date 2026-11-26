@@ -79,12 +79,13 @@ function crackTimeEstimate(bits) {
   const guessesPerSec = 1e11;
   const totalGuesses = Math.pow(2, bits);
   const seconds = totalGuesses / guessesPerSec / 2; // average half the keyspace
+  const n = (v, unit) => { const r = Math.round(v); return r + ' ' + unit + (r === 1 ? '' : 's'); };
   if (seconds < 1) return 'instant';
-  if (seconds < 60) return Math.round(seconds) + ' seconds';
-  if (seconds < 3600) return Math.round(seconds / 60) + ' minutes';
-  if (seconds < 86400) return Math.round(seconds / 3600) + ' hours';
-  if (seconds < 31536000) return Math.round(seconds / 86400) + ' days';
-  if (seconds < 31536000 * 1000) return Math.round(seconds / 31536000) + ' years';
+  if (seconds < 60) return n(seconds, 'second');
+  if (seconds < 3600) return n(seconds / 60, 'minute');
+  if (seconds < 86400) return n(seconds / 3600, 'hour');
+  if (seconds < 31536000) return n(seconds / 86400, 'day');
+  if (seconds < 31536000 * 1000) return n(seconds / 31536000, 'year');
   if (seconds < 31536000 * 1e6) return Math.round(seconds / 31536000 / 1000) + ' thousand years';
   if (seconds < 31536000 * 1e9) return Math.round(seconds / 31536000 / 1e6) + ' million years';
   if (seconds < 31536000 * 1e12) return Math.round(seconds / 31536000 / 1e9) + ' billion years';
