@@ -1,7 +1,3 @@
-// passgen — generate cryptographically random passwords or diceware-style
-// passphrases. Reports entropy in bits and a cracking-time estimate.
-// Zero runtime deps — uses node's crypto.randomBytes for unbiased sampling.
-
 'use strict';
 
 const crypto = require('crypto');

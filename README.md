@@ -1,25 +1,10 @@
 # passgen
 
-[![npm version](https://img.shields.io/npm/v/@v0idd0/passgen.svg?color=A0573A)](https://www.npmjs.com/package/@v0idd0/passgen)
-[![npm downloads](https://img.shields.io/npm/dw/@v0idd0/passgen.svg?color=1F1A14)](https://www.npmjs.com/package/@v0idd0/passgen)
-[![License: MIT](https://img.shields.io/badge/license-MIT-A0573A.svg)](LICENSE)
-[![Node ≥14](https://img.shields.io/badge/node-%E2%89%A514-1F1A14)](package.json)
+Generate a random password or a passphrase of random words. It prints an entropy estimate in bits and a rough offline cracking time next to each result.
 
-Generate cryptographically random passwords + diceware-style passphrases. Reports entropy in bits and a cracking-time estimate. Zero deps..
-
-```
-$ passgen
-<7}S2HF8dUbz;ii)
-  entropy 103.1 bits  very strong  · cracking time effectively forever
-
-$ passgen --passphrase --words 5 --capitalize --number-suffix
-Casual-Define-Cover-Hybrid-Axis-5742
-  entropy 63.3 bits  strong  · cracking time 2 years
-```
-
-## Why passgen
-
-Most "online password generators" are happy to use `Math.random()` (a PRNG that an attacker reading your timestamp can rewind), and most CLI alternatives use byte-modulo (which gives an off-by-one bias when modulus doesn't divide 256). passgen uses node's CSPRNG with **rejection sampling on uint32**, every character of the alphabet (or every word of the wordlist) appears with exactly equal probability. That extra rigor is invisible in the output but visible in the entropy report.
+[![npm](https://img.shields.io/npm/v/@v0idd0/passgen?color=00f6d0&labelColor=050914)](https://www.npmjs.com/package/@v0idd0/passgen)
+[![test](https://github.com/voidd0/passgen/actions/workflows/test.yml/badge.svg)](https://github.com/voidd0/passgen/actions/workflows/test.yml)
+[![license](https://img.shields.io/badge/license-MIT-00f6d0?labelColor=050914)](LICENSE)
 
 ## Install
 
@@ -27,94 +12,82 @@ Most "online password generators" are happy to use `Math.random()` (a PRNG that 
 npm install -g @v0idd0/passgen
 ```
 
+Or run it once without installing: `npx @v0idd0/passgen --help`. Needs Node.js 18 or newer. No dependencies.
+
+## Example
+
+One password and one passphrase. The values are random, so yours will differ. Output from real runs on 2026-11-26:
+
+```console
+$ passgen
+#8uU[mR21jtsVRSE
+  entropy 103.1 bits  very strong  · cracking time effectively forever
+
+$ passgen --passphrase --words 6 --capitalize
+Kiss-Rotate-Window-Genre-Cup-Twenty
+  entropy 64.9 bits  strong  · cracking time 6 years
+```
+
+Print only the values, for a script:
+
+```console
+$ passgen --bare --count 3 --length 20
+{DV%S+$H?mTny8KAPzWH
+mngKZK;Y6_It:UvWY3o.
+hRQT=LC*zE%b}ld$PbB6
+```
+
 ## Usage
 
-```bash
-# Default: one 16-char password (alpha + digits + symbols)
-passgen
+```text
+passgen: generate random passwords and passphrases.
 
-# Custom length
-passgen --length 32
+Usage:
+  passgen                          one 16-char password (default)
+  passgen --length 32              custom length
+  passgen --count 5                generate N at once
+  passgen --passphrase             passphrase of 5 random words
+  passgen --passphrase --words 7   custom word count
 
-# Generate many at once
-passgen --count 10
+Options:
+  --length <n>            Password length in chars (default 16, min 4).
+  --count  <n>            Generate N at once (default 1).
+  --passphrase, -p        Generate a passphrase of random words.
+  --words  <n>            Words in passphrase (default 5, min 3).
+  --separator <s>         Passphrase separator (default "-").
+  --capitalize            Capitalize each passphrase word.
+  --number-suffix         Append a 4-digit number to the passphrase.
+  --no-symbols            Exclude symbols from passwords.
+  --no-numbers            Exclude digits from passwords.
+  --no-upper              Exclude uppercase from passwords.
+  --json                  JSON output with entropy + crack-time estimate.
+  --bare                  Print just the password(s), no entropy report.
+  -h, --help              Show this help.
 
-# Diceware-style passphrase (5 words, ~50 bits entropy from a 1024-word list)
-passgen --passphrase
+Examples:
+  passgen
+  passgen --length 24 --count 3
+  passgen --passphrase --words 6 --capitalize --number-suffix
+  passgen --bare --count 10 > passwords.txt
+  passgen --json | jq '.results[0].password'
 
-# Beefier passphrase (~63 bits)
-passgen --passphrase --words 5 --capitalize --number-suffix
-
-# Restrict character set (e.g. for systems that reject symbols)
-passgen --length 20 --no-symbols
-passgen --length 24 --no-upper --no-symbols
-
-# Bare output for scripting (no entropy report)
-passgen --bare --count 100 > seed.txt
-
-# JSON for CI / programmatic use
-passgen --json | jq .password
+Docs and issues: https://github.com/voidd0/passgen
 ```
 
-## How random is it?
+## How the randomness works
 
-Entropy comes from `crypto.randomBytes`: node's CSPRNG (kernel `getrandom()` on Linux, `BCryptGenRandom` on Windows). Indices are derived via **rejection sampling on uint32**, which means every character of the alphabet (or every word of the wordlist) appears with exactly equal probability. No off-by-one bias from naïve `% N`.
+Every character and every word is picked with `crypto.randomBytes(4)` from the Node.js `crypto` module, which reads the operating system's random number generator. The 32-bit value is mapped to an index with rejection sampling, so there is no modulo bias.
 
-## Strength scale
-
-| bits | label | rough crack time at 10¹¹ guesses/sec |
-|---|---|---|
-| < 28 | weak | seconds: minutes |
-| 28-60 | reasonable | hours: months |
-| 60-90 | strong | years |
-| 90-128 | very strong | thousands: millions of years |
-| ≥ 128 | paranoid | effectively forever |
-
-Crack times assume an offline attack against a fast hash (SHA-256, MD5). bcrypt / Argon2 / scrypt are 10⁶, 10⁸× slower, so even "reasonable" entropy is safe in practice when the server hashes properly.
-
-## Compared to alternatives
-
-| tool | RNG | unbiased sampling | passphrase mode | offline | install |
-|---|---|---|---|---|---|
-| passgen | CSPRNG (`randomBytes`) | yes (rejection on uint32) | yes (1024-word list) | yes | one npm install |
-| `pwgen` | non-cryptographic | no | no | yes | bundled (Linux) |
-| `openssl rand -base64 N` | CSPRNG | yes | no | yes | bundled |
-| `1password generate` | CSPRNG | yes | yes | requires app | app |
-| Web generators | varies | rarely documented | varies | no | web |
-
-If you're already in 1Password or Bitwarden, use those, they sync. passgen is for the cases where you need a one-shot strong string in your shell (provisioning, CI seeds, DB roots).
-
-## FAQ
-
-**Why diceware over random characters?** Because 5 short words are easier to memorize than 9 random characters of equivalent entropy. Memorability matters when the password is for something you'll type, not paste.
-
-**Why a custom wordlist instead of EFF's 7776?** Smaller (1024 entries → 10 bits/word vs EFF's ~12.92), curated for shorter words (4-8 letters) and no homoglyph confusion. Trade-off: you need slightly more words (5 → 50 bits vs EFF's ~38.7) for the same entropy budget.
-
-**Should I use `--no-symbols`?** Only if your target system rejects them. Letters+digits gives ~5.95 bits/char vs full mixed at ~6.55, a 16-char password drops from 105 to 95 bits, both still in "very strong" territory.
-
-**Is "1024 word list" not power-of-two-suspicious for rejection sampling?** Caught one yourself. Naive single-byte rejection deadlocks when the wordlist size divides 256 (the rejection range becomes empty). passgen reads 4 bytes per index and rejects on `remainder == 0 ? range : range - remainder`, the same gate works for 256-, 1024-, and 65536-word lists.
-
-## Programmatic API
-
-```javascript
-const { generatePassword, generatePassphrase, entropyBits } =
-  require('@v0idd0/passgen');
-
-const pw = generatePassword(20, { symbols: false });
-console.log(pw, entropyBits(pw).toFixed(1) + ' bits');
-
-const phrase = generatePassphrase(5, { capitalize: true, numberSuffix: true });
-console.log(phrase);
-```
-
-## Wordlist
-
-passgen ships with a 1024-word built-in list (4-8 letter, lowercase, no homoglyphs). log₂(1024) = 10 bits per word, five words = 50 bits, the same ballpark as a 9-character mixed password but vastly more memorable.
+- Passwords draw from lower case letters, plus upper case, digits and symbols unless you switch them off. A password is not forced to contain every class.
+- The entropy figure for a password is `length * log2(pool)`, where the pool is built from the character classes that actually appear in that password.
+- The passphrase word list has 1,810 common English words (lower case, 3 to 9 letters, no duplicates), so each word adds `log2(1810)`, about 10.8 bits; the default 5 words give about 54 bits. It is our own list, not the EFF list.
+- The cracking time assumes an offline attacker making 10^11 guesses per second and finding the secret after half the key space. It is a rough guide, not a promise.
 
 ## License
 
-MIT.
+MIT, see [LICENSE](LICENSE).
 
 ---
 
-Maintained by v0idd0.
+Made by [vøiddo](https://voiddo.com/?src=gh). More command line tools: [voiddo.com/packages](https://voiddo.com/packages/?src=gh).
+We also run data scrapers for job boards, shops and ad libraries: [voiddo.com/scrapers](https://voiddo.com/scrapers/?src=gh).

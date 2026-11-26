@@ -1,4 +1,3 @@
-/* passgen — smoke tests. Run via: node test.js */
 'use strict';
 
 const {
@@ -14,7 +13,7 @@ function eq(label, a, b) {
 function truthy(label, v) { if (v) { console.log('  ok  ' + label); passed++; } else { console.log('  FAIL ' + label); failed++; } }
 
 console.log('wordlist:');
-eq('size 1024',                       WORDLIST_SIZE, 1024);
+eq('size 1810',                       WORDLIST_SIZE, 1810);
 
 console.log('\ngeneratePassword:');
 {
@@ -72,9 +71,9 @@ console.log('\nentropyBits:');
   truthy('full-pool ≥90 bits',         bits >= 90);
 }
 {
-  // 5-word passphrase: 5 * log2(1024) = 50 bits
+  // 5-word passphrase: 5 * log2(1810), about 54.1 bits
   const bits = entropyBits('apple-banana-coffee-donkey-eagle', { passphrase: true });
-  truthy('5-word passphrase ≈50 bits', Math.abs(bits - 50) < 0.1);
+  truthy('5-word passphrase ≈54.1 bits', Math.abs(bits - 5 * Math.log2(1810)) < 0.01);
 }
 
 console.log('\nstrengthLabel:');

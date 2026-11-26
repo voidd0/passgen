@@ -1,7 +1,7 @@
 {
   "name": "@v0idd0/passgen",
-  "version": "1.0.2",
-  "description": "Generate random passwords and diceware passphrases with crypto.randomBytes and unbiased sampling. Reports entropy in bits and an estimated cracking time. No dependencies.",
+  "version": "1.0.3",
+  "description": "Generate random passwords and passphrases of random words with Node.js crypto.randomBytes, with an entropy estimate in bits and a rough offline cracking time.",
   "main": "src/index.js",
   "bin": {
     "passgen": "./bin/passgen.js"
@@ -14,38 +14,32 @@
     "passphrase",
     "password-generator",
     "diceware",
-    "secure-random",
+    "random",
     "entropy",
     "security",
-    "cli",
-    "devtools"
+    "cli"
   ],
   "author": "vøiddo <support@voiddo.com> (https://voiddo.com)",
   "license": "MIT",
-  "homepage": "https://tools.voiddo.com/passgen/",
+  "homepage": "https://voiddo.com/packages/#passgen",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/voidd0/passgen.git"
   },
   "bugs": {
-    "url": "https://github.com/voidd0/passgen/issues",
-    "email": "support@voiddo.com"
-  },
-  "funding": {
-    "type": "individual",
-    "url": "https://voiddo.com/contact/"
+    "url": "https://github.com/voidd0/passgen/issues"
   },
   "publishConfig": {
     "access": "public"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=18"
   },
   "files": [
-    "bin/",
-    "src/",
-    "LICENSE",
-    "README.md"
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
   ],
   "os": [
     "darwin",

@@ -7,19 +7,19 @@ const {
   crackTimeEstimate, strengthLabel, WORDLIST_SIZE,
 } = require('../src/index');
 
-const HELP = `passgen — generate cryptographically random passwords + passphrases.
+const HELP = `passgen: generate random passwords and passphrases.
 
 Usage:
   passgen                          one 16-char password (default)
   passgen --length 32              custom length
   passgen --count 5                generate N at once
-  passgen --passphrase             diceware-style 5-word phrase
+  passgen --passphrase             passphrase of 5 random words
   passgen --passphrase --words 7   custom word count
 
 Options:
   --length <n>            Password length in chars (default 16, min 4).
   --count  <n>            Generate N at once (default 1).
-  --passphrase, -p        Generate a diceware-style passphrase.
+  --passphrase, -p        Generate a passphrase of random words.
   --words  <n>            Words in passphrase (default 5, min 3).
   --separator <s>         Passphrase separator (default "-").
   --capitalize            Capitalize each passphrase word.
@@ -36,7 +36,9 @@ Examples:
   passgen --length 24 --count 3
   passgen --passphrase --words 6 --capitalize --number-suffix
   passgen --bare --count 10 > passwords.txt
-  passgen --json | jq .password
+  passgen --json | jq '.results[0].password'
+
+Docs and issues: https://github.com/voidd0/passgen
 `;
 
 function parseArgs(argv) {
@@ -68,7 +70,7 @@ function parseArgs(argv) {
   return opts;
 }
 
-const isTTY = process.stdout.isTTY;
+const isTTY = process.stdout.isTTY && !process.env.NO_COLOR;
 const C = {
   reset: isTTY ? '\x1b[0m' : '',
   dim:   isTTY ? '\x1b[2m' : '',
